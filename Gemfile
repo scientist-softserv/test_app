@@ -47,6 +47,7 @@ gem "bootsnap", require: false
 group :development, :test do
   gem 'rspec-rails', '~> 6.1.0'
   gem 'rspec_junit_formatter'
+  gem 'rubocop-rails', require: false
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ]
 end
