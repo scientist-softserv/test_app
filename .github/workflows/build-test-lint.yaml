@@ -25,9 +25,9 @@ jobs:
   rspec-tests:
     needs: build
     uses: scientist-softserv/actions/.github/workflows/test.yaml@seperate_reports
-  reports:
-    needs: rspec-tests
-    uses: scientist-softserv/actions/.github/workflows/report.yaml@seperate_reports
   rubocop:
     needs: build
     uses: scientist-softserv/actions/.github/workflows/lint.yaml@v0.0.17
+  reports:
+    needs: [rspec-tests, rubocop]
+    uses: scientist-softserv/actions/.github/workflows/report.yaml@seperate_reports
