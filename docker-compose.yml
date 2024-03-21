@@ -1,0 +1,73 @@
+version: '3.8'
+
+x-app: &app
+  build:
+    context: .
+  image: ghcr.io/scientist-softserv/test_app:${TAG:-latest}
+  volumes:
+    - .:/app
+  env_file:
+    - .env
+    - .env.development
+  # Keep the stdin open, so we can attach to our app container's process
+  # and do things such as byebug, etc:
+  stdin_open: true
+  # Enable sending signals (CTRL+C, CTRL+P + CTRL+Q) into the container:
+  tty: true
+
+services:
+  postgres:
+    image: postgres
+    env_file:
+      - .env
+    ports:
+      - 5432
+    volumes:
+      - postgres:/var/lib/postgresql/data
+
+  vite:
+    <<: *app
+    entrypoint: /bin/bash ./ops/entrypoint-vite.sh
+    environment:
+      DEBUG: '*vite*'
+      RAILS_ENV: development
+      VITE_RUBY_HOST: 0.0.0.0
+    ports:
+      - "3036:3036"
+
+  web:
+    <<: *app
+    command: bash -c "bundle exec puma -p 3000"
+    ports:
+      - 3000
+    depends_on:
+      - postgres
+      - vite
+    environment:
+      VIRTUAL_HOST: test_app.test
+      VIRTUAL_PORT: 3000
+      VITE_RUBY_HOST: vite
+
+  initialize_app:
+    <<: *app
+    entrypoint: ["sh", "-c"]
+    command:
+      - >
+        bundle && rails db:migrate && rails db:seed
+    depends_on:
+      - web
+      - vite
+
+  cypress-tests:
+    container_name: cypress-tests
+    image: cypress/included:13.2.0
+    working_dir: /cypress
+    volumes:
+      - ./:/cypress
+    depends_on:
+      initialize_app:
+        condition: service_completed_successfully
+
+
+volumes:
+  postgres:
