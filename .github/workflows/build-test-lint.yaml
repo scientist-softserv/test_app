@@ -27,7 +27,6 @@ jobs:
   reports:
     needs: rspec-tests
     uses: scientist-softserv/actions/.github/workflows/report.yaml@seperate_reports
-  cypress-tests:
   rubocop:
     needs: build
     uses: scientist-softserv/actions/.github/workflows/lint.yaml@v0.0.17
