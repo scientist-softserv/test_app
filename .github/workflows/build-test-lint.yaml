@@ -29,5 +29,6 @@ jobs:
     needs: build
     uses: scientist-softserv/actions/.github/workflows/lint.yaml@seperate_reports
   reports:
+    if: always()
     needs: [rspec-tests, rubocop]
     uses: scientist-softserv/actions/.github/workflows/report.yaml@seperate_reports
